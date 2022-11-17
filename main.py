@@ -5,8 +5,9 @@ import sqlite3
 database_path = "./MarketBasket.db"
 connection = sqlite3.connect(database_path)
 sql = '''
-        select * from orders
+        SELECT * FROM f_products
 '''
+
 df = pd.read_sql(sql, connection)
 
 if __name__ == "__main__":
