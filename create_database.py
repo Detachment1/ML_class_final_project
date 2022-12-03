@@ -78,6 +78,71 @@ sql = '''
                         ORDER BY order_id
         '''
 curser.execute(sql)
+# create indexes on the table : f_order_products_prior
+sql = '''
+            CREATE INDEX f_order_products_prior_order_hour_of_day_eval_set ON f_order_products_prior (order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_prior_department_eval_set ON f_order_products_prior (department, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_prior_aisle_eval_set ON f_order_products_prior (aisle, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_prior_aisle_order_hour_of_day_eval_set ON f_order_products_prior (aisle, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_prior_department_order_hour_of_day_eval_set ON f_order_products_prior (department, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_prior_product_name_order_hour_of_day_eval_set ON f_order_products_prior (product_name, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+# create fact table f_order_products_train
+sql = '''
+            CREATE TABLE IF NOT EXISTS f_order_products_train AS
+                SELECT orders.order_id AS order_id, user_id, eval_set, order_dow, order_hour_of_day, 
+                days_since_prior_order, reordered, product_name, aisle, department FROM orders
+                    LEFT JOIN order_products_train opt on orders.order_id = opt.order_id
+                    LEFT JOIN f_products fp ON fp.product_id = opt.product_id
+                        ORDER BY order_id
+        '''
+curser.execute(sql)
+# create indexes on the table : f_order_products_train
+sql = '''
+            CREATE INDEX f_order_products_train_order_hour_of_day_eval_set ON f_order_products_train (order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_train_department_eval_set ON f_order_products_train (department, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_train_aisle_eval_set ON f_order_products_train (aisle, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_train_aisle_order_hour_of_day_eval_set ON f_order_products_train (aisle, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_train_department_order_hour_of_day_eval_set ON f_order_products_train (department, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+sql = '''
+            CREATE INDEX f_order_products_train_product_name_order_hour_of_day_eval_set ON f_order_products_train (product_name, order_hour_of_day, eval_set);
+        '''
+curser.execute(sql)
+# refresh the database to use optimal plan
+sql = '''
+            ANALYZE;
+        '''
+curser.execute(sql)
 # close connection
 connection.close()
 
