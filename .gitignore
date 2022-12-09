@@ -2,3 +2,6 @@
 MarketBasket.db
 .git
 *.html
+*.csv
+*.zip
+*.pickle

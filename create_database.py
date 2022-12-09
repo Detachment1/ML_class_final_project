@@ -78,6 +78,35 @@ sql = '''
                         ORDER BY order_id
         '''
 curser.execute(sql)
+# drop table history_order_products if exists
+sql = '''
+        DROP TABLE IF EXISTS history_order_products 
+'''
+curser.execute(sql)
+# create table history_order_products
+sql = '''
+            CREATE TABLE IF NOT EXISTS history_order_products AS
+                SELECT a.order_id as order_id, user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_id, add_to_cart_order, reordered FROM (SELECT a.user_id as user_id, order_id, order_number, order_dow, order_hour_of_day, days_since_prior_order FROM (SELECT user_id FROM orders where eval_set='train') a
+                LEFT JOIN (SELECT * FROM orders where eval_set='prior') b
+                on a.user_id = b.user_id) a
+                LEFT JOIN order_products_prior opp
+                on a.order_id = opp.order_id;
+        '''
+curser.execute(sql)
+# drop table user_products_train if exists
+sql = '''
+        DROP TABLE IF EXISTS user_products_train
+'''
+curser.execute(sql)
+# create table user_products_train
+sql = '''
+            CREATE TABLE IF NOT EXISTS user_products_train AS
+                SELECT o.order_id as order_id, user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_id, add_to_cart_order, reordered from orders o
+                left join order_products_train opt
+                on o.order_id = opt.order_id
+                where eval_set='train' and reordered=1;
+        '''
+curser.execute(sql)
 # create indexes on the table : f_order_products_prior
 sql = '''
             CREATE INDEX f_order_products_prior_order_hour_of_day_eval_set ON f_order_products_prior (order_hour_of_day, eval_set);
