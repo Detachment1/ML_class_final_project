@@ -9,3 +9,4 @@
 * ```plotly```
 * ```matplotlib```
 * ```xgboost```
+* ```scikit-learn```

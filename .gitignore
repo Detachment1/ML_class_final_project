@@ -5,3 +5,4 @@ MarketBasket.db
 *.csv
 *.zip
 *.pickle
+*.lprof
