@@ -7,6 +7,9 @@ import xgboost as xgb
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn import svm
@@ -23,7 +26,7 @@ def test():
         df_history_order_products = pd.read_pickle(df_history_order_products_path)
     else:
         sql = '''
-                            SELECT * FROM history_order_products ORDER BY user_id, order_id LIMIT 1000;
+                            SELECT * FROM history_order_products ORDER BY user_id, order_id;
                             '''
         df_history_order_products = pd.read_sql(sql, connection)
         if use_local_buffer:
@@ -35,7 +38,7 @@ def test():
         df_user_products_train = pd.read_pickle(df_user_products_train_path)
     else:
         sql = '''
-                            SELECT * FROM user_products_train ORDER BY user_id, order_id LIMIT 1000;
+                            SELECT * FROM user_products_train ORDER BY user_id, order_id;
                             '''
         df_user_products_train = pd.read_sql(sql, connection)
         if use_local_buffer:
@@ -48,7 +51,7 @@ def test():
     else:
         sql = '''
                             SELECT user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order FROM orders 
-                            WHERE eval_set='train' ORDER BY user_id, order_id LIMIT 1000;
+                            WHERE eval_set='train' ORDER BY user_id, order_id;
                                 '''
         df_orders_train = pd.read_sql(sql, connection)
         if use_local_buffer:
@@ -156,12 +159,18 @@ def test():
     d_validation = xgb.DMatrix(x_validation)
     predictions = (bst.predict(d_validation) > 0.21).astype(int)
     print("Accuracy of xgboost : ", accuracy_score(y_validation, predictions))
+    print("Precision of xgboost : ", precision_score(y_validation, predictions))
+    print("Recall of xgboost : ", recall_score(y_validation, predictions))
+    print("F1_score of xgboost : ", f1_score(y_validation, predictions))
 
     # LDA classifier
     lda = LDA(n_components=1)
     lda.fit(x_train, y_train)
     predictions = lda.predict(x_validation)
     print("Accuracy of LDA : ", accuracy_score(y_validation, predictions))
+    print("Precision of LDA : ", precision_score(y_validation, predictions))
+    print("Recall of LDA : ", recall_score(y_validation, predictions))
+    print("F1 score of LDA : ", f1_score(y_validation, predictions))
 
     # SVM is too slow
     # SVM classifier with linear kernel

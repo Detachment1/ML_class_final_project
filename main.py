@@ -2,13 +2,7 @@ import pandas as pd
 import sqlite3
 
 # test code
-database_path = "./MarketBasket.db"
-connection = sqlite3.connect(database_path)
-sql = '''
-        SELECT * FROM f_products
-'''
 
-df = pd.read_sql(sql, connection)
+test = pd.read_csv(
+        r"../data/sample_submission.csv")
 
-if __name__ == "__main__":
-    print("write code here")
