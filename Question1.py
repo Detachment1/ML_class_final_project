@@ -10,6 +10,7 @@ from sklearn.metrics import accuracy_score, make_scorer
 from sklearn.metrics import f1_score
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
+from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 from sklearn.preprocessing import StandardScaler
@@ -20,60 +21,51 @@ database_path = "./MarketBasket.db"
 
 
 def train_xgboost(data_train, label_train, data_validation, label_validation):
-    grid_search_parameter = {
-        "objective": ["reg:logistic"]
-        , "eval_metric": ["logloss"]
-        , "learning_rate": [0.1, 0.05]
-        , "min_child_weight": [8, 10, 12]
-        , "gamma": [0.7]
-        , "subsample": [0.5, 0.7, 0.9]
-        , "colsample_bytree": [0.9]
-        , "lambda": [10]
-        , "n_estimators": [80]
-        , "scale_pos_weight": [9, 10]
-        , "tree_method": ["gpu_hist"]
-    }
     # grid_search_parameter = {
     #     "objective": ["reg:logistic"]
     #     , "eval_metric": ["logloss"]
     #     , "learning_rate": [0.1]
-    #     , "min_child_weight": [8, 10]
-    #     , "gamma": [0.7]
-    #     , "subsample": [0.5]
+    #     , "min_child_weight": [8]
+    #     , "gamma": [0.1]
+    #     , "subsample": [0.9]
     #     , "colsample_bytree": [0.9]
-    #     , "lambda": [10]
+    #     , "lambda": [2]
     #     , "n_estimators": [80]
     #     , "scale_pos_weight": [9]
+    #     , "tree_method": ["gpu_hist"]
     # }
-    # Init Grid Search
-    search_classifier = xgb.XGBRegressor()
-    def my_score_function(label, predictions):
-        best_f1_score = 0
-        for threshold in np.arange(0.1, 1.0, 0.1):
-            buffer_predictions_label = (predictions > threshold).astype(int)
-            buffer_score = f1_score(label, buffer_predictions_label)
-            if buffer_score > best_f1_score:
-                best_f1_score = buffer_score
-        return best_f1_score
-    my_f1_score = make_scorer(my_score_function)
-    grid_search = GridSearchCV(search_classifier, grid_search_parameter, n_jobs=-1, cv=3, scoring=my_f1_score, )
-    # Fit
-    grid_search.fit(data_train, label_train)
-    # optimal_parameter = {
-    #     "objective": "reg:logistic"
-    #     , "eval_metric": "logloss"
-    #     , "learning_rate": 0.1
-    #     , "max_depth": 6
-    #     , "min_child_weight": 10
-    #     , "gamma": 0.70
-    #     , "subsample": 0.76
-    #     , "colsample_bytree": 0.95
-    #     , "alpha": 2e-05
-    #     , "lambda": 10
-    #     , "n_estimators": 80
-    # }
+    # # Init Grid Search
+    # search_classifier = xgb.XGBRegressor()
+    # def my_f1_score_function(label, predictions):
+    #     best_f1_score = 0
+    #     for threshold in np.arange(0.1, 1.0, 0.1):
+    #         buffer_predictions_label = (predictions > threshold).astype(int)
+    #         buffer_score = f1_score(label, buffer_predictions_label)
+    #         if buffer_score > best_f1_score:
+    #             best_f1_score = buffer_score
+    #     return best_f1_score
+    # def my_log_loss_score_function(label, predictions):
+    #     return log_loss(label, predictions)
+    # my_f1_score = make_scorer(my_f1_score_function)
+    # my_log_score = make_scorer(my_log_loss_score_function, greater_is_better=False)
+    # grid_search = GridSearchCV(search_classifier, grid_search_parameter, n_jobs=-1, cv=3, scoring=my_log_score)
+    # # Fit
+    # grid_search.fit(data_train, label_train)
+    optimal_parameter = {
+        "objective": "reg:logistic"
+        , "eval_metric": "logloss"
+        , "learning_rate": 0.1
+        , "min_child_weight": 8
+        , "gamma": 0.1
+        , "subsample": 0.9
+        , "colsample_bytree": 0.9
+        , "lambda": 2
+        , "n_estimators": 80
+        , "scale_pos_weight": 9
+        , "tree_method": "gpu_hist"
+    }
     # use optimal parameter to create a new classifier
-    optimal_parameter = grid_search.best_params_
+    # optimal_parameter = grid_search.best_params_
     print("Optimal xgboost parameters : ", optimal_parameter)
     xgb_classifier = xgb.XGBRegressor(**optimal_parameter)
     # train
