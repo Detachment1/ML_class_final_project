@@ -86,8 +86,9 @@ curser.execute(sql)
 # create table history_order_products
 sql = '''
             CREATE TABLE IF NOT EXISTS history_order_products AS
-                SELECT a.order_id as order_id, user_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_id, add_to_cart_order, reordered FROM 
-                (SELECT a.user_id as user_id, order_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, a.eval_set as eval_set  FROM (SELECT user_id, eval_set FROM orders where eval_set='train' or eval_set='test') a
+                SELECT a.order_id as order_id, user_id, a.eval_set as eval_set, order_number, order_dow, order_hour_of_day, days_since_prior_order, product_id, add_to_cart_order, reordered FROM
+                (SELECT a.user_id as user_id, order_id, order_number, order_dow, order_hour_of_day, days_since_prior_order, a.eval_set as eval_set FROM
+                    (SELECT user_id, eval_set FROM orders where eval_set='train' or eval_set='test') a
                 LEFT JOIN (SELECT * FROM orders where eval_set='prior') b
                 on a.user_id = b.user_id) a
                 LEFT JOIN order_products_prior opp
