@@ -31,6 +31,7 @@ def train_xgboost(data_train, label_train, data_validation, label_validation):
         , "lambda": [10]
         , "n_estimators": [80]
         , "scale_pos_weight": [9, 10]
+        , "tree_method": ["gpu_hist"]
     }
     # grid_search_parameter = {
     #     "objective": ["reg:logistic"]
